@@ -1,5 +1,5 @@
 production:
   gcp_bucket_name: "austin-bikeshare"
-  project_id : "wide-saga-380511"
+  project_id : "" # Add your project ID here
   dataset_id: "bikeshare_trips"
   table_id : "bikeshare_external"
