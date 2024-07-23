@@ -64,5 +64,5 @@ Run this command start all services `from the root directory of the repository`:
 ## Improvements:
 
 - Following steps can be taken to implement data quality checks:
-    - Implement data quality checks the data is correctly ingested into Google Storage Buckets from the public dataset.
+    - Implement data quality checks the verify data is correctly ingested into Google Storage Buckets from the public dataset.
     - Implement data quality checks to ensure the data is correctly written in the external table inside BigQuery .

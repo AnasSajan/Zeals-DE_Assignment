@@ -23,7 +23,7 @@ def query_bikeshare_data() -> tuple:
     query = f"""
     SELECT *
     FROM `bigquery-public-data.austin_bikeshare.bikeshare_trips` 
-    WHERE  DATE(TIMESTAMP_ADD(start_time, INTERVAL 9 HOUR)) = '{yesterday_dummy}'
+    WHERE  DATE(start_time)= '{yesterday_dummy}'
     """
 
     query_job = client.query(query)
