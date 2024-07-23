@@ -22,6 +22,7 @@
         - BigQuery User
         - Storage Admin
     - Create and download a JSON key file for this service account and place it inside `dags/scripts/` directory as `service_account.json`.
+    - Add your project ID to [dags/scripts/config.yml](dags/scripts/config.yml) file.
 
 ### 2. Run the docker compose stack 
 
