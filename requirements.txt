@@ -1,0 +1,9 @@
+google-cloud-bigquery
+google-cloud-storage
+pandas
+pyarrow
+apache-airflow
+pyyaml
+psycopg2-binary
+apache-airflow-providers-celery
+db-dtypes
