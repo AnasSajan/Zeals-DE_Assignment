@@ -50,12 +50,18 @@ Run this command start all services `from the root directory of the repository`:
 
 - Trigger the DAG `bikeshare_etl` to run the ETL.
 
-### 4. Check the Data in Google Cloud
+### 4. Backfilling 
+
+- To run the DAG for a previous date or to backfill historical data, you can use the parameters `start_date` and `end_date` in the Airflow UI.
+   - Go to `Admin` -> `Variables` and set the `start_date` and `end_date` variables to the desired date range.
+   - The format should be `YYYY-MM-DD` and `start_date` > `end_date`.
+
+### 5. Check the Data in Google Cloud
 
 - Go to Cloud Strorage and check the bucket `zeals-de-assignment/austin-bikeshare` created containing the daily data partitioned by date and hour. 
 - Navigate to BigQuery and check the dataset `bikeshare` created containing the table `trips_external` with the data reflected from the hourly partitioned files.
 
-### 5. Run Data Analysis Queries
+### 6. Run Data Analysis Queries
 
 - [Data Analysis Queries](dags/scripts/queries.sql) : Run the SQL queries in the file to analyze the data in BigQuery.
 
