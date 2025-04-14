@@ -7,3 +7,6 @@ pyyaml
 psycopg2-binary
 apache-airflow-providers-celery
 db-dtypes
+google-cloud-bigquery-storage
+python-dotenv
+

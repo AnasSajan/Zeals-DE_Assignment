@@ -29,9 +29,15 @@ USER airflow
 # Copy DAGs and scripts to the Airflow directory
 COPY dags/ /opt/airflow/dags/
 COPY dags/scripts/ /opt/airflow/dags/scripts/
+COPY utils/ /opt/airflow/utils/
+
+# Set PYTHONPATH to include dags and scripts directories
+ENV PYTHONPATH="/opt/airflow/utils:/opt/airflow/dags:/opt/airflow/dags/scripts:$PYTHONPATH"
 
 # Set environment variables
 ENV GOOGLE_APPLICATION_CREDENTIALS="/opt/airflow/dags/scripts/service_account.json"
+COPY .env /opt/airflow/.env
+
 
 # Use the official Airflow entrypoint
 ENTRYPOINT ["/entrypoint"]

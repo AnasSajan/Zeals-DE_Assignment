@@ -1,74 +1,81 @@
-import pendulum
-from google.cloud import bigquery
-from google.cloud import storage
-import pandas as pd
-import pyarrow.parquet as pq
-import pyarrow as pa
-
 import logging
 
+import pandas as pd
+import pendulum
+import pyarrow as pa
+import pyarrow.parquet as pq
+from google.cloud import bigquery, storage
 
-def query_bikeshare_data() -> tuple:
+from utils.config import load_config
+
+
+def get_query_file() -> str:
+    config = load_config()
+    query_file_path = config["query_file_path"]
+    with open(query_file_path, "r") as file:
+        query = file.read()
+    return query
+
+
+def query_bikeshare_data(config, start_date, end_date) -> tuple:
     client = bigquery.Client()
-
     # Check if the BigQuery Storage API is available
     try:
         from google.cloud import bigquery_storage
+
         bqstorage_client = bigquery_storage.BigQueryReadClient()
     except ImportError:
         bqstorage_client = None
-    yesterday = pendulum.yesterday().format('YYYY-MM-DD')
-    yesterday_dummy = pendulum.yesterday().subtract(months=8).format('YYYY-MM-DD')
-
-    query = f"""
-    SELECT *
-    FROM `bigquery-public-data.austin_bikeshare.bikeshare_trips` 
-    WHERE  DATE(start_time)= '{yesterday_dummy}'
-    """
-
+    if not start_date:
+        start_date = pendulum.now("Asia/Tokyo").subtract(days=1).format("YYYY-MM-DD")
+    if not end_date:
+        end_date = pendulum.now("Asia/Tokyo").format("YYYY-MM-DD")
+    logging.info(f"Start date: {start_date}, End date: {end_date}")
+    logging.info("Bucket name: %s", config["bucket_name"])
+    now = pendulum.now().format("YYYY-MM-DD HH:mm:ss")
+    query = (
+        get_query_file()
+        .replace("#start_date#", f"{start_date}")
+        .replace("#end_date#", f"{end_date}")
+        .replace("#ingested_at#", f"{now}")
+    )
+    logging.info(f"Querying data for {start_date} from BigQuery")
+    logging.info(f"Query: {query}")
     query_job = client.query(query)
     results = query_job.result().to_dataframe(bqstorage_client=bqstorage_client)
 
-    # Convert start_time to datetime
-    results['start_time'] = pd.to_datetime(results['start_time'])
-
-    return results, yesterday
+    return results, start_date
 
 
-def save_to_parquet(daily_data, date) -> None:
+def save_to_parquet(config, daily_data, date) -> None:
     storage_client = storage.Client()
-    bucket_name = 'austin-bikeshare'
-    bucket = storage_client.bucket(bucket_name)
+    bucket = storage_client.bucket(config["bucket_name"])
+    dataset = config["dataset"]
+    folder_name = config["folder_name"]
 
     # Check if bucket exists, if not create it
     if not bucket.exists():
-        bucket = storage_client.create_bucket(bucket_name)
-        logging.info(f"Bucket {bucket_name} created.")
+        bucket = storage_client.create_bucket(bucket)
+        logging.info(f"Bucket {bucket} created.")
 
-    base_path = f'austin-bikeshare-daily/{date}'
+    base_path = f"{folder_name}/{date}"
 
     for hour in range(24):
         # Ensure start_time is datetime before filtering
-        daily_data['start_time'] = pd.to_datetime(daily_data['start_time'])
+        daily_data["start_time"] = pd.to_datetime(daily_data["start_time"])
 
         # Filter data by hour
-        hourly_data = daily_data[daily_data['start_time'].dt.hour == hour]
+        hourly_data = daily_data[daily_data["start_time"].dt.hour == hour]
 
         if not hourly_data.empty:
             hour_data = hourly_data.reset_index(drop=True)
-            hour_path = f'{base_path}/{hour:02d}/bikesahre_trips.parquet'
+            hour_path = f"{base_path}/{hour:02d}/{dataset}.parquet"
             blob = bucket.blob(hour_path)
 
             output_stream = pa.BufferOutputStream()
             pq.write_table(pa.Table.from_pandas(hour_data), output_stream)
-            blob.upload_from_string(output_stream.getvalue().to_pybytes(), content_type='application/octet-stream')
+            blob.upload_from_string(
+                output_stream.getvalue().to_pybytes(),
+                content_type="application/octet-stream",
+            )
             logging.info(f"Saved data for {date} hour {hour:02d} to {hour_path}")
-
-
-if __name__ == "__main__":
-    data, date = query_bikeshare_data()
-    if not data.empty:
-        logging.info(f"Data fetched successfully. Total records: {len(data)}")
-        save_to_parquet(data, date)
-    else:
-        logging.info("No data available to fetch.")

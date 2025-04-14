@@ -1,5 +1,6 @@
 production:
-  gcp_bucket_name: "austin-bikeshare"
-  project_id : "" # Add your project ID here
-  dataset_id: "bikeshare_trips"
-  table_id : "bikeshare_external"
+  bucket_name: "zeals-de-assignment"
+  folder_name: "austin-bikeshare"
+  dataset: "bikeshare"
+  table_id : "trips_external"
+  query_file_path: "/opt/airflow/dags/scripts/query.sql"

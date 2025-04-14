@@ -22,7 +22,6 @@
         - BigQuery User
         - Storage Admin
     - Create and download a JSON key file for this service account and place it inside `dags/scripts/` directory as `service_account.json`.
-    - Add your project ID to [dags/scripts/config.yml](dags/scripts/config.yml) file.
 
 ### 2. Run the docker compose stack 
 
@@ -53,8 +52,8 @@ Run this command start all services `from the root directory of the repository`:
 
 ### 4. Check the Data in Google Cloud
 
-- Go to Cloud Strorage and check the bucket `austin-bikeshare` created containing the daily data partitioned by date and hour. 
-- Navigate to BigQuery and check the dataset `bikeshare_trips` created containing the table `bikeshare_external` with the data reflected from the hourly partitioned files.
+- Go to Cloud Strorage and check the bucket `zeals-de-assignment/austin-bikeshare` created containing the daily data partitioned by date and hour. 
+- Navigate to BigQuery and check the dataset `bikeshare` created containing the table `trips_external` with the data reflected from the hourly partitioned files.
 
 ### 5. Run Data Analysis Queries
 
